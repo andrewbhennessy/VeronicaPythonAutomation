@@ -22,7 +22,7 @@ from rauth.service import OAuth2Session
 import simplejson as json
 import os
 import urllib.parse
-
+import time
 
 
 from subprocess import call
@@ -44,7 +44,7 @@ clientSecret = 'XqT068pvGEtlZiGD'
 accessToken = 'ZtzbEzraT6WOlfGuXRyb1sHS7HLp'
 redirectUrl = 'http://localhost.autodesk.com/callback'
 scope = 'data:read data:write'
-PHOTO_DIR = '/Volumes/NIKON/Master'
+PHOTO_DIR = '/Volumes/NIKON 1/Master'
 
 # TODO: optional - non-critical
 #
@@ -91,6 +91,7 @@ def list_files(camera, context, path='/'):
 def main():
     os.system("sudo killall PTPCamera")
     Name = input('Enter your name: ')
+    sceneName=Name
     logging.basicConfig(
         format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
     gp.check_result(gp.use_python_logging())
@@ -112,10 +113,15 @@ def main():
         camera = gp.Camera()
         # search ports for camera port name
         port_info_list = gp.PortInfoList()
+        time.sleep(1)
         port_info_list.load()
+        time.sleep(1)
         idx = port_info_list.lookup_path(camera_list[cam][1])
+        time.sleep(1)
         camera.set_port_info(port_info_list[idx])
+        time.sleep(1)
         camera.init(context)
+        time.sleep(1)
         text = camera.get_summary(context)
         print('Summary')
         print('=======')
@@ -144,7 +150,7 @@ def main():
         gp.check_result(gp.gp_camera_exit(camera, context))
         camera.exit(context)
     os.system("sudo python3 /Users/andrewhennessy/Google\\Drive/Photogrammerty/PhotoTo3D-cli-FactumArte.py"+str(dest_dir))
-    reuseSession(dest_dir)
+    reuseSession(PHOTO_DIR,Name)
 
 def get_file_info(camera, context, path):
     folder, name = os.path.split(path)
@@ -181,7 +187,7 @@ def authenticate():
 
 # Note: method assumes an access_token - calls Photo to 3D endpoints
 #
-def reuseSession(directory):
+def reuseSession(directory,name):
 
     
 
@@ -204,10 +210,12 @@ def reuseSession(directory):
     # Create a Photoscene
     #
     """
+
+    sceneName = str(sceneName)
     req = session.post(BASE_ENDPOINT + '/photoscene',
                        data={'scenename': sceneName,
                              'meshquality': '9',
-                             'format': 'obj,ortho',
+                             'format': 'obj',
                              'metadata_name[0]': 'smartTex',
                              'metadata_value[0]': '1',
                              'metadata_name[1]': 'StitchingCreateInputFile',
@@ -252,131 +260,43 @@ def reuseSession(directory):
     """
     # Upload local images to Photoscene
     #
-    localArray = os.listdir(directory)
+    localBuffer = str(directory)+str(name)
+    localArray = os.listdir(localBuffer)
     for i in range(len(localArray)):
-        localArray[i] = os.path.join(directory,localArray[i])
+        localArray[i] = str(directory)+str(name)+str(localArray[i])
+
+    multiple_files=[]
     
+    for num in range(95):
+        multiple_files.append(('file['+num+']',(os.path.basename(localArray[num]),open(localArray[num],'rb'),'image/jpeg'))
+                              
+#    multiple_files = [
+ #       ('file[0]',(os.path.basename(localArray[0]), open(localArray[0], 'rb'), 'image/jpeg')),
 
-    multiple_files = [
-        ('file[0]',(os.path.basename(localArray[0]), open(localArray[0], 'rb'), 'image/jpeg')),
-('file[1]',(os.path.basename(localArray[1]), open(localArray[1], 'rb'), 'image/jpeg')),
-('file[2]',(os.path.basename(localArray[2]), open(localArray[2], 'rb'), 'image/jpeg')),
-('file[3]',(os.path.basename(localArray[3]), open(localArray[3], 'rb'), 'image/jpeg')),
-('file[4]',(os.path.basename(localArray[4]), open(localArray[4], 'rb'), 'image/jpeg')),
-('file[5]',(os.path.basename(localArray[5]), open(localArray[5], 'rb'), 'image/jpeg')),
-('file[6]',(os.path.basename(localArray[6]), open(localArray[6], 'rb'), 'image/jpeg')),
-('file[7]',(os.path.basename(localArray[7]), open(localArray[7], 'rb'), 'image/jpeg')),
-('file[8]',(os.path.basename(localArray[8]), open(localArray[8], 'rb'), 'image/jpeg')),
-('file[9]',(os.path.basename(localArray[9]), open(localArray[9], 'rb'), 'image/jpeg')),
-('file[10]',(os.path.basename(localArray[10]), open(localArray[10], 'rb'), 'image/jpeg')),
-('file[11]',(os.path.basename(localArray[11]), open(localArray[11], 'rb'), 'image/jpeg')),
-('file[12]',(os.path.basename(localArray[12]), open(localArray[12], 'rb'), 'image/jpeg')),
-('file[13]',(os.path.basename(localArray[13]), open(localArray[13], 'rb'), 'image/jpeg')),
-('file[14]',(os.path.basename(localArray[14]), open(localArray[14], 'rb'), 'image/jpeg')),
-('file[15]',(os.path.basename(localArray[15]), open(localArray[15], 'rb'), 'image/jpeg')),
-('file[16]',(os.path.basename(localArray[16]), open(localArray[16], 'rb'), 'image/jpeg')),
-('file[17]',(os.path.basename(localArray[17]), open(localArray[17], 'rb'), 'image/jpeg')),
-('file[18]',(os.path.basename(localArray[18]), open(localArray[18], 'rb'), 'image/jpeg')),
-('file[19]',(os.path.basename(localArray[19]), open(localArray[19], 'rb'), 'image/jpeg')),
-('file[20]',(os.path.basename(localArray[20]), open(localArray[20], 'rb'), 'image/jpeg')),
-('file[21]',(os.path.basename(localArray[21]), open(localArray[21], 'rb'), 'image/jpeg')),
-('file[22]',(os.path.basename(localArray[22]), open(localArray[22], 'rb'), 'image/jpeg')),
-('file[23]',(os.path.basename(localArray[23]), open(localArray[23], 'rb'), 'image/jpeg')),
-('file[24]',(os.path.basename(localArray[24]), open(localArray[24], 'rb'), 'image/jpeg')),
-('file[25]',(os.path.basename(localArray[25]), open(localArray[25], 'rb'), 'image/jpeg')),
-('file[26]',(os.path.basename(localArray[26]), open(localArray[26], 'rb'), 'image/jpeg')),
-('file[27]',(os.path.basename(localArray[27]), open(localArray[27], 'rb'), 'image/jpeg')),
-('file[28]',(os.path.basename(localArray[28]), open(localArray[28], 'rb'), 'image/jpeg')),
-('file[29]',(os.path.basename(localArray[29]), open(localArray[29], 'rb'), 'image/jpeg')),
-('file[30]',(os.path.basename(localArray[30]), open(localArray[30], 'rb'), 'image/jpeg')),
-('file[31]',(os.path.basename(localArray[31]), open(localArray[31], 'rb'), 'image/jpeg')),
-('file[32]',(os.path.basename(localArray[32]), open(localArray[32], 'rb'), 'image/jpeg')),
-('file[33]',(os.path.basename(localArray[33]), open(localArray[33], 'rb'), 'image/jpeg')),
-('file[34]',(os.path.basename(localArray[34]), open(localArray[34], 'rb'), 'image/jpeg')),
-('file[35]',(os.path.basename(localArray[35]), open(localArray[35], 'rb'), 'image/jpeg')),
-('file[36]',(os.path.basename(localArray[36]), open(localArray[36], 'rb'), 'image/jpeg')),
-('file[37]',(os.path.basename(localArray[37]), open(localArray[37], 'rb'), 'image/jpeg')),
-('file[38]',(os.path.basename(localArray[38]), open(localArray[38], 'rb'), 'image/jpeg')),
-('file[39]',(os.path.basename(localArray[39]), open(localArray[39], 'rb'), 'image/jpeg')),
-('file[40]',(os.path.basename(localArray[40]), open(localArray[40], 'rb'), 'image/jpeg')),
-('file[41]',(os.path.basename(localArray[41]), open(localArray[41], 'rb'), 'image/jpeg')),
-('file[42]',(os.path.basename(localArray[42]), open(localArray[42], 'rb'), 'image/jpeg')),
-('file[43]',(os.path.basename(localArray[43]), open(localArray[43], 'rb'), 'image/jpeg')),
-('file[44]',(os.path.basename(localArray[44]), open(localArray[44], 'rb'), 'image/jpeg')),
-('file[45]',(os.path.basename(localArray[45]), open(localArray[45], 'rb'), 'image/jpeg')),
-('file[46]',(os.path.basename(localArray[46]), open(localArray[46], 'rb'), 'image/jpeg')),
-('file[47]',(os.path.basename(localArray[47]), open(localArray[47], 'rb'), 'image/jpeg')),
-('file[48]',(os.path.basename(localArray[48]), open(localArray[48], 'rb'), 'image/jpeg')),
-('file[49]',(os.path.basename(localArray[49]), open(localArray[49], 'rb'), 'image/jpeg')),
-('file[50]',(os.path.basename(localArray[50]), open(localArray[50], 'rb'), 'image/jpeg')),
-('file[51]',(os.path.basename(localArray[51]), open(localArray[51], 'rb'), 'image/jpeg')),
-('file[52]',(os.path.basename(localArray[52]), open(localArray[52], 'rb'), 'image/jpeg')),
-('file[53]',(os.path.basename(localArray[53]), open(localArray[53], 'rb'), 'image/jpeg')),
-('file[54]',(os.path.basename(localArray[54]), open(localArray[54], 'rb'), 'image/jpeg')),
-('file[55]',(os.path.basename(localArray[55]), open(localArray[55], 'rb'), 'image/jpeg')),
-('file[56]',(os.path.basename(localArray[56]), open(localArray[56], 'rb'), 'image/jpeg')),
-('file[57]',(os.path.basename(localArray[57]), open(localArray[57], 'rb'), 'image/jpeg')),
-('file[58]',(os.path.basename(localArray[58]), open(localArray[58], 'rb'), 'image/jpeg')),
-('file[59]',(os.path.basename(localArray[59]), open(localArray[59], 'rb'), 'image/jpeg')),
-('file[60]',(os.path.basename(localArray[60]), open(localArray[60], 'rb'), 'image/jpeg')),
-('file[61]',(os.path.basename(localArray[61]), open(localArray[61], 'rb'), 'image/jpeg')),
-('file[62]',(os.path.basename(localArray[62]), open(localArray[62], 'rb'), 'image/jpeg')),
-('file[63]',(os.path.basename(localArray[63]), open(localArray[63], 'rb'), 'image/jpeg')),
-('file[64]',(os.path.basename(localArray[64]), open(localArray[64], 'rb'), 'image/jpeg')),
-('file[65]',(os.path.basename(localArray[65]), open(localArray[65], 'rb'), 'image/jpeg')),
-('file[66]',(os.path.basename(localArray[66]), open(localArray[66], 'rb'), 'image/jpeg')),
-('file[67]',(os.path.basename(localArray[67]), open(localArray[67], 'rb'), 'image/jpeg')),
-('file[68]',(os.path.basename(localArray[68]), open(localArray[68], 'rb'), 'image/jpeg')),
-('file[69]',(os.path.basename(localArray[69]), open(localArray[69], 'rb'), 'image/jpeg')),
-('file[70]',(os.path.basename(localArray[70]), open(localArray[70], 'rb'), 'image/jpeg')),
-('file[71]',(os.path.basename(localArray[71]), open(localArray[71], 'rb'), 'image/jpeg')),
-('file[72]',(os.path.basename(localArray[72]), open(localArray[72], 'rb'), 'image/jpeg')),
-('file[73]',(os.path.basename(localArray[73]), open(localArray[73], 'rb'), 'image/jpeg')),
-('file[74]',(os.path.basename(localArray[74]), open(localArray[74], 'rb'), 'image/jpeg')),
-('file[75]',(os.path.basename(localArray[75]), open(localArray[75], 'rb'), 'image/jpeg')),
-('file[76]',(os.path.basename(localArray[76]), open(localArray[76], 'rb'), 'image/jpeg')),
-('file[77]',(os.path.basename(localArray[77]), open(localArray[77], 'rb'), 'image/jpeg')),
-('file[78]',(os.path.basename(localArray[78]), open(localArray[78], 'rb'), 'image/jpeg')),
-('file[79]',(os.path.basename(localArray[79]), open(localArray[79], 'rb'), 'image/jpeg')),
-('file[80]',(os.path.basename(localArray[80]), open(localArray[80], 'rb'), 'image/jpeg')),
-('file[81]',(os.path.basename(localArray[81]), open(localArray[81], 'rb'), 'image/jpeg')),
-('file[82]',(os.path.basename(localArray[82]), open(localArray[82], 'rb'), 'image/jpeg')),
-('file[83]',(os.path.basename(localArray[83]), open(localArray[83], 'rb'), 'image/jpeg')),
-('file[84]',(os.path.basename(localArray[84]), open(localArray[84], 'rb'), 'image/jpeg')),
-('file[85]',(os.path.basename(localArray[85]), open(localArray[85], 'rb'), 'image/jpeg')),
-('file[86]',(os.path.basename(localArray[86]), open(localArray[86], 'rb'), 'image/jpeg')),
-('file[87]',(os.path.basename(localArray[87]), open(localArray[87], 'rb'), 'image/jpeg')),
-('file[88]',(os.path.basename(localArray[88]), open(localArray[88], 'rb'), 'image/jpeg')),
-('file[89]',(os.path.basename(localArray[89]), open(localArray[89], 'rb'), 'image/jpeg')),
-('file[90]',(os.path.basename(localArray[90]), open(localArray[90], 'rb'), 'image/jpeg')),
-('file[91]',(os.path.basename(localArray[91]), open(localArray[91], 'rb'), 'image/jpeg')),
-('file[92]',(os.path.basename(localArray[92]), open(localArray[92], 'rb'), 'image/jpeg')),
-('file[93]',(os.path.basename(localArray[93]), open(localArray[93], 'rb'), 'image/jpeg')),
-('file[94]',(os.path.basename(localArray[94]), open(localArray[94], 'rb'), 'image/jpeg')),
-('file[95]',(os.path.basename(localArray[95]), open(localArray[95], 'rb'), 'image/jpeg'))]
 
-    req = session.post(BASE_ENDPOINT + '/file',
-                       data={'photosceneid': pid,
-                             'type': 'image'},
-                       files = multiple_files
-                       )
+    for file in range(len(multiple_files)):
+        req = session.post(BASE_ENDPOINT + '/file',
+                           data={'photosceneid': pid,
+                                 'type': 'image'},
+                           files = multiple_files[file]
+                           )
 
-    print(req.json()) #{'photosceneid': '9Qhty43WV1NvuHdkPOHYH1L1VBIPO4uXU3jj6vZ2ikU', 'Usage': '4.6607179641724', 'Resource': '/file', 'Files': {'file': [{'filesize': '364436', 'filename': '_MG_9026.jpg', 'fileid': '274bad0314b048fa99ca2a17689f3737', 'msg': 'already on server'}, {'filesize': '332689', 'filename': '_MG_9027.jpg', 'fileid': '41350bd9a4ff410b82545cac87e676b5', 'msg': 'already on server'}, {'filesize': '332689', 'filename': '_MG_9027.jpg', 'fileid': '41350bd9a4ff410b82545cac87e676b5', 'msg': 'already on server'}]}}
+        print(req.json()) #{'photosceneid': '9Qhty43WV1NvuHdkPOHYH1L1VBIPO4uXU3jj6vZ2ikU', 'Usage': '4.6607179641724', 'Resource': '/file', 'Files': {'file': [{'filesize': '364436', 'filename': '_MG_9026.jpg', 'fileid': '274bad0314b048fa99ca2a17689f3737', 'msg': 'already on server'}, {'filesize': '332689', 'filename': '_MG_9027.jpg', 'fileid': '41350bd9a4ff410b82545cac87e676b5', 'msg': 'already on server'}, {'filesize': '332689', 'filename': '_MG_9027.jpg', 'fileid': '41350bd9a4ff410b82545cac87e676b5', 'msg': 'already on server'}]}}
 
-    # Process Photoscene
-    #
-    req = session.post(BASE_ENDPOINT + '/photoscene/' + pid)
-    print(req.json())  # {'Photoscene': {'photosceneid': 'FGGBmaP9J3hA8yjSQwxaiIu8AbawlmtE37fnLHOa6Hc'}, 'Resource': '/photoscene/FGGBmaP9J3hA8yjSQwxaiIu8AbawlmtE37fnLHOa6Hc', 'msg': 'No error', 'Usage': '2.5454890727997'}
-    
+        # Process Photoscene
+        #
+        req = session.post(BASE_ENDPOINT + '/photoscene/' + pid)
+        print(req.json())  # {'Photoscene': {'photosceneid': 'FGGBmaP9J3hA8yjSQwxaiIu8AbawlmtE37fnLHOa6Hc'}, 'Resource': '/photoscene/FGGBmaP9J3hA8yjSQwxaiIu8AbawlmtE37fnLHOa6Hc', 'msg': 'No error', 'Usage': '2.5454890727997'}
+        
 
-    # Get Photoscene output file
-    #
+        # Get Photoscene output file
+        #
     req = session.get(BASE_ENDPOINT + '/photoscene/' + pid,
                       data={'format': 'ortho'}
                       )
 
     print(req.json())   # {'Resource': '/photoscene/FGGBmaP9J3hA8yjSQwxaiIu8AbawlmtE37fnLHOa6Hc', 'Error': {'code': '22', 'msg': 'Data is not ready'}, 'Usage': '0.38405299186707'}
-    # {'Resource': '/photoscene/FGGBmaP9J3hA8yjSQwxaiIu8AbawlmtE37fnLHOa6Hc', 'Usage': '0.70922684669495', 'Photoscene': {'progressmsg': 'DONE', 'photosceneid': 'FGGBmaP9J3hA8yjSQwxaiIu8AbawlmtE37fnLHOa6Hc', 'resultmsg': {}, 'scenelink': 'https://s3.amazonaws.com/com.autodesk.storage.production/V5C5QB5QPBHZ/my/a5c481bf7b124d6f89ca68718f888780/2ee1231976db45e6950772ff3f8a115b-c308bfe6c8d64bdba97f3a62ed5d1e90?AWSAccessKeyId=AKIAJ5BDHTMLFDQJDQTQ&Expires=1465822417&Signature=XG0vShIeFGFKq1KVhL8kj/K321w=', 'progress': '100', 'filesize': '8266'}}
+            # {'Resource': '/photoscene/FGGBmaP9J3hA8yjSQwxaiIu8AbawlmtE37fnLHOa6Hc', 'Usage': '0.70922684669495', 'Photoscene': {'progressmsg': 'DONE', 'photosceneid': 'FGGBmaP9J3hA8yjSQwxaiIu8AbawlmtE37fnLHOa6Hc', 'resultmsg': {}, 'scenelink': 'https://s3.amazonaws.com/com.autodesk.storage.production/V5C5QB5QPBHZ/my/a5c481bf7b124d6f89ca68718f888780/2ee1231976db45e6950772ff3f8a115b-c308bfe6c8d64bdba97f3a62ed5d1e90?AWSAccessKeyId=AKIAJ5BDHTMLFDQJDQTQ&Expires=1465822417&Signature=XG0vShIeFGFKq1KVhL8kj/K321w=', 'progress': '100', 'filesize': '8266'}}
 
 #authenticate()
     
