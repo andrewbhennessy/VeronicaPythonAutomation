@@ -43,7 +43,7 @@ accessToken = 'ZtzbEzraT6WOlfGuXRyb1sHS7HLp'
 redirectUrl = 'http://localhost.autodesk.com/callback'
 scope = 'data:read data:write'
 PHOTO_DIR = '/Volumes/NIKON 1/Master'
-S3Bucket = 'veronicaautodeskbuffer'
+S3Bucket = 'veronicastandard'
 
 # TODO: optional - non-critical
 #
@@ -146,7 +146,7 @@ def main():
             gp.check_result(gp.gp_file_save(camera_file, dest))
         gp.check_result(gp.gp_camera_exit(camera, context))
         camera.exit(context)
-    reuseSession(dest_dir,Name)
+    #reuseSession(dest_dir,Name)
 
 
 def get_file_info(camera, context, path):
@@ -190,8 +190,7 @@ def reuseSession(dest_dir,name,uploadFlag=True):
 
     for i in range(95):
         urlArray.append(
-            "https://s3.eu-central-1.amazonaws.com/" + str(S3Bucket) + '/' + str(localArray[0]).replace(' ', '+'))
+            "https://s3.website-us-east-1.amazonaws.com/" + str(S3Bucket) + '/' + str(localArray[0]).replace(' ', '+'))
         print(str(urlArray))
 
-reuseSession(PHOTO_DIR,"PAULA")
-#main()
+main()
