@@ -42,8 +42,10 @@ clientSecret = 'XqT068pvGEtlZiGD'
 accessToken = 'ZtzbEzraT6WOlfGuXRyb1sHS7HLp'
 redirectUrl = 'http://localhost.autodesk.com/callback'
 scope = 'data:read data:write'
-PHOTO_DIR = '/Volumes/NIKON 1/Master'
+PHOTO_DIR = '/media/factum/Veronica/Master'
 S3Bucket = 'veronicastandard'
+numScans= 4
+passthruName = "ScansOnFridayJuly22"
 
 # TODO: optional - non-critical
 #
@@ -91,9 +93,14 @@ def list_files(camera, context, path='/'):
     return result
 
 
-def main():
+def scanMe(starting,ending,passthruName):
+    counter = 0
     os.system("sudo killall PTPCamera")
-    Name = input('Enter your name: ')
+    if passthruName != "":
+        print("No Name!!, Using Name: "+str(passthruName)+" #"+str((starting/12)))
+        Name = str(passthruName)+" #"+str((starting/12))
+    else:
+        Name = input('Enter your name: ')
     logging.basicConfig(
         format='%(levelname)s: %(name)s: %(message)s', level=logging.WARNING)
     gp.check_result(gp.use_python_logging())
@@ -111,7 +118,7 @@ def main():
     computer_files = list_computer_files()
     print('Getting list of files from camera...')
     for cam in range(len(camera_list)):
-        os.system("sudo killall PTPCamera")
+        #os.system("sudo killall PTPCamera")
         camera = gp.Camera()
         # search ports for camera port name
         port_info_list = gp.PortInfoList()
@@ -125,12 +132,13 @@ def main():
         # print(str(text))
         camera_files = list_files(camera, context)
         camera_files.reverse()
-        print(camera_files[:12])
+        print(camera_files[starting:ending])
         if not camera_files:
             print('No files found')
             return 1
         print('Copying files...')
-        for path in camera_files[:12]:
+        for path in camera_files[starting:ending]:
+            counter += 1
             info = get_camera_file_info(camera, context, path)
             timestamp = datetime.fromtimestamp(info.file.mtime)
             folder, name = os.path.split(path)
@@ -143,7 +151,12 @@ def main():
                 os.makedirs(dest_dir)
             camera_file = gp.check_result(gp.gp_camera_file_get(
                 camera, folder, name, gp.GP_FILE_TYPE_NORMAL, context))
+            print("Starting to Save.")
             gp.check_result(gp.gp_file_save(camera_file, dest))
+            print("Saved")
+            print("Percent Complete "+str((counter/96)*100))
+            print(str(152-(((counter/96)*100)*152)/100)+" Seconds Remaining.")
+
         gp.check_result(gp.gp_camera_exit(camera, context))
         camera.exit(context)
     #reuseSession(dest_dir,Name)
@@ -193,4 +206,12 @@ def reuseSession(dest_dir,name,uploadFlag=True):
             "https://s3.website-us-east-1.amazonaws.com/" + str(S3Bucket) + '/' + str(localArray[0]).replace(' ', '+'))
         print(str(urlArray))
 
-main()
+
+def multiscan():
+    for scans in range(numScans):
+        scanMe(scans*12,(scans*12+12),passthruName)
+
+def singleScan():
+    scanMe(0,12,"")
+
+singleScan()
